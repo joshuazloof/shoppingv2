@@ -14,7 +14,9 @@ class OrdersController < ApplicationController
 
   # GET /orders/new
   def new
-    @order = Order.new
+    session[:order_params] ||= {}
+    @order = Order.new(session[:order_params])
+    @order.current_step = session[:order_step]
   end
 
   # GET /orders/1/edit
@@ -24,18 +26,35 @@ class OrdersController < ApplicationController
   # POST /orders
   # POST /orders.json
   def create
-    @order = Order.new(order_params)
-
-    respond_to do |format|
-      if @order.save
-        format.html { redirect_to @order, notice: 'Order was successfully created.' }
-        format.json { render :show, status: :created, location: @order }
-      else
-        format.html { render :new }
-        format.json { render json: @order.errors, status: :unprocessable_entity }
-      end
-      format.js
+    session[:order_params].deep_merge!(order_params) if order_params
+    @order = Order.new(session[:order_params])
+    @order.current_step = session[:order_step]
+    if params[:back_button]
+      @order.previous_step
+    elsif @order.last_step?
+      @order.save
+    else
+      @order.next_step
     end
+    session[:order_step] = @order.current_step
+    if @order.new_record?
+      render "new"
+    else
+      session[:order_step] = session[:order_params] = nil
+      flash[:notice] = "Order saved"
+      redirect_to @order
+    end
+
+#    respond_to do |format|
+#      if @order.save
+#       format.html { redirect_to @order, notice: 'Order was successfully created.' }
+#        format.json { render :show, status: :created, location: @order }
+#      else
+#        format.html { render :new }
+#        format.json { render json: @order.errors, status: :unprocessable_entity }
+#      end
+#      format.js
+#    end
   end
 
   # PATCH/PUT /orders/1
@@ -70,6 +89,6 @@ class OrdersController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def order_params
-      params.require(:order).permit(:name, :consult_date, :consult_time, :delivery_date, :delivery_time)
+      params.fetch(:order,{}).permit(:name, :consult_date, :consult_time, :delivery_date, :delivery_time)
     end
 end
