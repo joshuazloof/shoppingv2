@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  consult_date: 2014-09-19
+  consult_time: 2014-09-19 03:05:47
+  delivery_date: 2014-09-19
+  delivery_time: 2014-09-19 03:05:47
+
+two:
+  name: MyString
+  consult_date: 2014-09-19
+  consult_time: 2014-09-19 03:05:47
+  delivery_date: 2014-09-19
+  delivery_time: 2014-09-19 03:05:47
