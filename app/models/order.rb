@@ -1,7 +1,9 @@
 class Order < ActiveRecord::Base
 	has_many :order_items
 	has_many :items, through: :order_items
-	attr_writer :current_step
+  attr_writer :current_step
+
+  accepts_nested_attributes_for :order_items
 
 	def current_step
 		@current_step || steps.first

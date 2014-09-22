@@ -14,9 +14,7 @@ class OrdersController < ApplicationController
 
   # GET /orders/new
   def new
-    session[:order_params] ||= {}
-    @order = Order.new(session[:order_params])
-    @order.current_step = session[:order_step]
+    @order = OrderWizard.new(session, params).new
   end
 
   # GET /orders/1/edit
@@ -26,18 +24,11 @@ class OrdersController < ApplicationController
   # POST /orders
   # POST /orders.json
   def create
-    session[:order_params].deep_merge!(order_params) if order_params
-    @order = Order.new(session[:order_params])
-    @order.current_step = session[:order_step]
-    if params[:back_button]
-      @order.previous_step
-    elsif @order.last_step?
-      @order.save
-    else
-      @order.next_step
-    end
-    session[:order_step] = @order.current_step
+    store_order_params_in_session!
+    @order = OrderWizard.new(session, params).create
+
     if @order.new_record?
+      @items = Item.all
       render "new"
     else
       session[:order_step] = session[:order_params] = nil
@@ -82,6 +73,11 @@ class OrdersController < ApplicationController
   end
 
   private
+
+  def store_order_params_in_session!
+    session[:order_params].deep_merge!(order_params) if order_params
+  end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_order
       @order = Order.find(params[:id])
@@ -89,6 +85,8 @@ class OrdersController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def order_params
-      params.fetch(:order,{}).permit(:name, :consult_date, :consult_time, :delivery_date, :delivery_time)
+      params.fetch(:order,{}).permit(:name,
+                                     :consult_date, :consult_time, :delivery_date, :delivery_time,
+                                     order_items_attributes: [:quantity, :item_id])
     end
 end
