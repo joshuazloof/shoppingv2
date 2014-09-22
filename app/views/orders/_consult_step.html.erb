@@ -1,13 +1,25 @@
-    <h2>Consult Time</h2>
-    <div class="field">
-      <%= f.label :name %><br>
-      <%= f.text_field :name %>
-    </div>
-    <div class="field">
-      <%= f.label :consult_date %><br>
-      <%= f.date_select :consult_date %>
-    </div>
-    <div class="field">
-      <%= f.label :consult_time %><br>
-      <%= f.time_select :consult_time %>
-    </div>
+<h2>Order</h2>
+<table class="field">
+<%= f.fields_for :order_items do |fi| %>
+  <tr>
+    <td><%= fi.object.item.name %></td>
+    <td><%= fi.label :quantity %></td>
+    <td><%= fi.text_field :quantity %></td>
+    <td><%= fi.hidden_field :item_id, value: fi.object.item.id %></td>
+  </tr>
+<% end %>
+</table>
+
+<h2>Consult Time</h2>
+<div class="field">
+  <%= f.label :name %><br>
+  <%= f.text_field :name %>
+</div>
+<div class="field">
+  <%= f.label :consult_date %><br>
+  <%= f.date_select :consult_date %>
+</div>
+<div class="field">
+  <%= f.label :consult_time %><br>
+  <%= f.time_select :consult_time %>
+</div>
